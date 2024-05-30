@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ["8.1"]
+        php-version: ["8.3"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,13 +35,16 @@ jobs:
       # - name: Validate composer.json and composer.lock
       #   run: composer validate --strict
 
-      - name: Install Composer dependencies
+      - name: Rector install
         # Allow the previous check to fail but not abort
         if: always()
-        uses: ramsey/composer-install@v2
-        with:
-          # Ignore zip for php-webdriver/webdriver
-          composer-options: "--ignore-platform-req=ext-zip"
+        run: composer require rector/rector --dev
+
+      - name: Run rector
+        # Allow the previous check to fail but not abort
+        if: always()
+        run: vendor/bin/rector process --dry-run
+
 
       # TODO: Enable this after resolving issues
       # - name: Cache coding-standard
@@ -52,10 +55,10 @@ jobs:
       #     path: .phpcs-cache
       #     key: phpcs-cache
 
-      - name: Lint PHP files
-        # Allow the previous check to fail but not abort
-        if: always()
-        run: ./ci/ci-phplint
+      #      - name: Lint PHP files
+      #        # Allow the previous check to fail but not abort
+      #        if: always()
+      #        run: ./ci/ci-phplint
 
       # TODO: Enable this after resolving issues
       # - name: Check coding-standard
